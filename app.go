@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli"
@@ -108,9 +106,7 @@ func create(c *cli.Context) error {
 
 	if result == "Create" {
 		// Create the first snapshot.
-		var snapDir = testDir + "/snaps/"
-		os.Mkdir(snapDir, os.ModePerm)
-		file, err := os.Create(snapDir + strconv.FormatInt(time.Now().Unix(), 10) + ".txt")
+		file, err := os.Create(testDir + "/expected_output.txt")
 		if err != nil {
 			log.Fatal("Cannot create file", err)
 		}
@@ -151,22 +147,8 @@ func runTest(testID string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var mostRecentSnap = 0
-	snapFiles, err := ioutil.ReadDir("./__snapper__/tests/" + testID + "/snaps")
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, snapFile := range snapFiles {
-		timestamp, err2 := strconv.Atoi(strings.Split(snapFile.Name(), ".")[0])
-		if err2 != nil {
-			continue
-		}
-		if timestamp > mostRecentSnap {
-			mostRecentSnap = timestamp
-		}
-	}
 
-	expectedOutput, err := ioutil.ReadFile("./__snapper__/tests/" + testID + "/snaps/" + strconv.Itoa(mostRecentSnap) + ".txt")
+	expectedOutput, err := ioutil.ReadFile("./__snapper__/tests/" + testID + "/expected_output.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
