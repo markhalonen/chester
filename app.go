@@ -71,7 +71,6 @@ func create(c *cli.Context) error {
 	}
 	var id = 0
 	for _, f := range files {
-		fmt.Println(f.Name())
 		i, err := strconv.Atoi(f.Name())
 		if err != nil {
 			continue
@@ -89,11 +88,11 @@ func create(c *cli.Context) error {
 	defer file.Close()
 	fmt.Fprintf(file, arg)
 	var commandResult = runCommand(arg)
-	fmt.Println("Ran: ", arg, " output:")
+	fmt.Println("Output:")
 	fmt.Println(commandResult)
 
 	prompt := promptui.Select{
-		Label: "Select Day",
+		Label: "Create Test?",
 		Items: []string{"Create", "Exit"},
 	}
 
@@ -112,9 +111,10 @@ func create(c *cli.Context) error {
 		}
 		defer file.Close()
 		fmt.Fprintf(file, commandResult)
+		fmt.Println("Test created! Run tests with `snapper test`")
+	} else {
+		return nil
 	}
-
-	fmt.Printf("You choose %q\n", result)
 
 	return nil
 }
@@ -153,12 +153,22 @@ func runTest(testID string) {
 		log.Fatal(err)
 	}
 	var actualOutput = runCommand(string(command))
-	fmt.Println("Expected output: " + string(expectedOutput))
-	fmt.Println("Actual output: " + string(actualOutput))
 
 	if actualOutput == string(expectedOutput) {
-		fmt.Println("passed.")
+		fmt.Println(testID, ": passed")
 	} else {
-		fmt.Println("failed.")
+		fmt.Println(testID, ": failed")
+		printWithBorder("Expected Output", string(expectedOutput))
+		printWithBorder("Actual Output", string(actualOutput))
 	}
+}
+
+func printWithBorder(title, content string) {
+	var border = "========================================================="
+	title = " " + title + " "
+	var titleIdx = (len(border) - len(title)) / 2
+	var titleWithBorder = border[0:titleIdx] + title + border[titleIdx+len(title):]
+	fmt.Println(titleWithBorder)
+	fmt.Println(content)
+	fmt.Println(border)
 }
