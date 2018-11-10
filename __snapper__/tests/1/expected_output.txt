@@ -1,0 +1,12 @@
+.
+└── __snapper__
+    └── tests
+
+2 directories, 0 files
+======================== Output =========================
+hello world
+
+=========================================================
+Creating a test with command:  echo "hello world"
+Test created! Run tests with `snapper test`
+0 : passed
