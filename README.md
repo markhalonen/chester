@@ -1,4 +1,8 @@
 # snapper
+---
+Snapper aims to be a low-effort testing framework. Life is too short to write tests manually.
+
+Snapper works by creating snapshot tests against any command line output. REST APIs or anything that can be invoked from command line can use snapper to watch for changes and easily update tests with one click.
 
 ### Install
 1. Download the latest release from the [Github Releases Tab](https://github.com/markhalonen/snapper/releases)
