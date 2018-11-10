@@ -5,7 +5,9 @@
 
 ### Usage
 `snapper init` Creates the `__snapper__` directory where all the commands and snapshots will be stored
+
 `snapper create 'echo "Hello world"'` Create your first snapper test
+
 `snapper test` Run your new snapper test
 
 ## Motivation
