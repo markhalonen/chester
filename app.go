@@ -88,8 +88,7 @@ func create(c *cli.Context) error {
 	defer file.Close()
 	fmt.Fprintf(file, arg)
 	var commandResult = runCommand(arg)
-	fmt.Println("Output:")
-	fmt.Println(commandResult)
+	printWithBorder("Output", commandResult)
 
 	prompt := promptui.Select{
 		Label: "Create Test?",
@@ -142,13 +141,13 @@ func test(c *cli.Context) error {
 }
 
 func runTest(testID string) {
-
-	command, err := ioutil.ReadFile("./__snapper__/tests/" + testID + "/command.txt")
+	var testDir = "./__snapper__/tests/" + testID
+	command, err := ioutil.ReadFile(testDir + "/command.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	expectedOutput, err := ioutil.ReadFile("./__snapper__/tests/" + testID + "/expected_output.txt")
+	expectedOutput, err := ioutil.ReadFile(testDir + "/expected_output.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -160,6 +159,29 @@ func runTest(testID string) {
 		fmt.Println(testID, ": failed")
 		printWithBorder("Expected Output", string(expectedOutput))
 		printWithBorder("Actual Output", string(actualOutput))
+		prompt := promptui.Select{
+			Label: "Options",
+			Items: []string{"Update Expected Output", "Delete Test", "Skip", "Exit"},
+		}
+
+		_, result, err := prompt.Run()
+
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+			return
+		}
+
+		if result == "Exit" {
+			os.Exit(0)
+		} else if result == "Skip" {
+			fmt.Println("Skipping")
+			return
+		} else if result == "Delete Test" {
+			os.RemoveAll(testDir)
+		} else if result == "Update Expected Output" {
+			ioutil.WriteFile(testDir+"/expected_output.txt", []byte(actualOutput), os.ModePerm)
+		}
+
 	}
 }
 
