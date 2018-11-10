@@ -1,0 +1,1 @@
+echo "in a file!" > file.txt;cat file.txt;rm file.txt
