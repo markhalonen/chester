@@ -13,12 +13,17 @@ The benefits of Snapshot Testing:
 There should be very limited code involved in "writing" snapshot tests. But that's currently not the case. Developers are expected to manually write the same snapshot code over and over.
 
 So I propose a new API Snapshot Testing Tool with the following goals:
+
 1. Works for any system that gives output from a command line instruction (it can test itself!)
 2. Minimize writing code
 3. Quickly create snapshot tests
-  4.1 Specify the query
-  4.2 Inspect the result
-  4.3 Save snapshot
+
+   3.1. Specify the query
+   
+   3.2. Inspect the result
+   
+   3.3. Save snapshot
+   
 4. Quickly compare failing snapshot tests and update so they pass again
   4.1 Update in bulk
 
