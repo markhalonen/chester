@@ -18,18 +18,15 @@ So I propose a new API Snapshot Testing Tool with the following goals:
 2. Minimize writing code
 3. Quickly create snapshot tests
 
-   3.1. Specify the query
+   3.1. Specify the command
    
-   3.2. Inspect the result
+   3.2. Inspect the response
    
    3.3. Save snapshot
    
 4. Quickly compare failing snapshot tests and update so they pass again
-  4.1 Update in bulk
-
-My first thought was a UI, but in reality a command line tool is probably best.
 
 The command line tool would look something like:
 
-snapper create 'curl -X GET http:localhost:8080/todos' // Runs the query and displays the result. Y/N to save to disk. curl command is the key for the db (db probably json)
+snapper create 'curl -X GET http:localhost:8080/todos' // Runs the command and displays the result. Y/N to save to disk.
 snapper test // Runs all the tests. For each failing test, show a diff of the output and Y/N if the snapshot should be updated.
