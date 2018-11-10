@@ -27,11 +27,23 @@ func main() {
 			Name:   "create",
 			Usage:  "create a test",
 			Action: create,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "silent",
+					Usage: "silent mode",
+				},
+			},
 		},
 		{
 			Name:   "test",
 			Usage:  "run the tests",
 			Action: test,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "silent",
+					Usage: "silent mode",
+				},
+			},
 		},
 	}
 
@@ -83,16 +95,20 @@ func create(c *cli.Context) error {
 	var commandResult = runCommandFromDir(command, runDir)
 	printWithBorder("Output", commandResult)
 
-	prompt := promptui.Select{
-		Label: "Create Test?",
-		Items: []string{"Create", "Exit"},
-	}
+	result := "Create"
+	if !c.Bool("silent") {
+		prompt := promptui.Select{
+			Label: "Create Test?",
+			Items: []string{"Create", "Exit"},
+		}
 
-	_, result, err := prompt.Run()
+		_, result2, err := prompt.Run()
+		result = result2
 
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return nil
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+			return nil
+		}
 	}
 
 	if result == "Create" {
@@ -180,12 +196,12 @@ func test(c *cli.Context) error {
 		log.Fatal(err)
 	}
 	for _, f := range files {
-		runTest(f.Name())
+		runTest(f.Name(), c.Bool("silent"))
 	}
 	return nil
 }
 
-func runTest(testID string) {
+func runTest(testID string, silentMode bool) {
 	testDir := "./__snapper__/tests/" + testID
 	runTestDir := filepath.Join(testDir, "run_test")
 	command, err := ioutil.ReadFile(filepath.Join(runTestDir, "command.sh"))
@@ -205,16 +221,21 @@ func runTest(testID string) {
 		fmt.Println(testID, ": failed")
 		printWithBorder("Expected Output", string(expectedOutput))
 		printWithBorder("Actual Output", string(actualOutput))
-		prompt := promptui.Select{
-			Label: "Options",
-			Items: []string{"Update Expected Output", "Delete Test", "Skip", "Exit"},
-		}
 
-		_, result, err := prompt.Run()
+		result := "Skip"
+		if !silentMode {
+			prompt := promptui.Select{
+				Label: "Options",
+				Items: []string{"Update Expected Output", "Delete Test", "Skip", "Exit"},
+			}
 
-		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
-			return
+			_, result2, err := prompt.Run()
+			result = result2
+
+			if err != nil {
+				fmt.Printf("Prompt failed %v\n", err)
+				return
+			}
 		}
 
 		if result == "Exit" {
