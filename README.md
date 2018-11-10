@@ -1,4 +1,4 @@
-# snapper [![Build Status](https://travis-ci.org/markhalonen/snapper.svg?branch=master)](https://travis-ci.org/markhalonen/snapper)
+# snapper [![Build Status](https://travis-ci.org/markhalonen/snapper.svg?branch=master)](https://travis-ci.org/markhalonen/snapper) [![Go Report Card](https://goreportcard.com/badge/github.com/markhalonen/snapper)](https://goreportcard.com/report/github.com/markhalonen/snapper)
 ---
 Snapper aims to be a low-effort testing framework. Life is too short to write tests manually.
 
