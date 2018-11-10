@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 
 	"github.com/manifoldco/promptui"
@@ -62,32 +63,24 @@ func create(c *cli.Context) error {
 	// python process_files.py
 	arg := c.Args().Get(0)
 	if arg == "" {
-		log.Fatal("Must specify a command")
+		log.Fatal("Must specify a command or a directory containing command.sh")
 	}
-	fmt.Println("Creating a test with command: ", arg)
-	files, err := ioutil.ReadDir("./__snapper__/tests")
-	if err != nil {
-		log.Fatal(err)
+
+	// First check if it's a folder with command.sh inside it
+	// Else run it as a command itself.
+	var runDir = ""
+	var command = ""
+	if _, err := os.Stat(filepath.Join(arg, "command.sh")); !os.IsNotExist(err) {
+		// run from here!
+		runDir = arg
+		command = "./command.sh"
+	} else {
+		// They passed in a string command directly.
+		runDir = ""
+		command = arg
 	}
-	var id = 0
-	for _, f := range files {
-		i, err := strconv.Atoi(f.Name())
-		if err != nil {
-			continue
-		}
-		if i >= id {
-			id = i + 1
-		}
-	}
-	var testDir = "__snapper__/tests/" + strconv.Itoa(id)
-	os.Mkdir(testDir, os.ModePerm)
-	file, err := os.Create(testDir + "/command.txt")
-	if err != nil {
-		log.Fatal("Cannot create file", err)
-	}
-	defer file.Close()
-	fmt.Fprintf(file, arg)
-	var commandResult = runCommand(arg)
+
+	var commandResult = runCommandFromDir(command, runDir)
 	printWithBorder("Output", commandResult)
 
 	prompt := promptui.Select{
@@ -103,14 +96,8 @@ func create(c *cli.Context) error {
 	}
 
 	if result == "Create" {
-		// Create the first snapshot.
-		file, err := os.Create(testDir + "/expected_output.txt")
-		if err != nil {
-			log.Fatal("Cannot create file", err)
-		}
-		defer file.Close()
-		fmt.Fprintf(file, commandResult)
-		fmt.Println("Test created! Run tests with `snapper test`")
+		// Create the snapshot.
+		createTest(runDir, arg, commandResult)
 	} else {
 		return nil
 	}
@@ -118,14 +105,72 @@ func create(c *cli.Context) error {
 	return nil
 }
 
-func runCommand(command string) string {
+func createTest(runDir, arg, commandResult string) {
+	fmt.Println("Creating a test with command: ", arg)
+	files, err := ioutil.ReadDir("./__snapper__/tests")
+	if err != nil {
+		log.Fatal(err)
+	}
+	var id = 0
+	for _, f := range files {
+		i, err := strconv.Atoi(f.Name())
+		if err != nil {
+			continue
+		}
+		if i >= id {
+			id = i + 1
+		}
+	}
+	testDir := filepath.Join("__snapper__/tests/", strconv.Itoa(id))
+	runTestDir := filepath.Join(testDir, "run_test")
+	os.MkdirAll(runTestDir, os.ModePerm)
+
+	if runDir == "" {
+		// arg should be written to file
+		file, err := os.Create(runTestDir + "/command.sh")
+		if err != nil {
+			log.Fatal("Cannot create file", err)
+		}
+		defer file.Close()
+		fmt.Fprintf(file, arg)
+	} else {
+		// arg is a folder, it's contents should be copied over
+		filesToCopy, _ := filepath.Glob(filepath.Join(arg, "/*"))
+
+		for _, f := range filesToCopy {
+			cpCmd := exec.Command("cp", "-r", f, filepath.Join(runTestDir, "/"))
+
+			output, err := cpCmd.CombinedOutput()
+			if err != nil {
+				fmt.Println(string(output))
+				log.Fatal(err)
+			}
+		}
+
+	}
+
+	file, err := os.Create(testDir + "/expected_output.txt")
+	if err != nil {
+		log.Fatal("Cannot create file", err)
+	}
+	defer file.Close()
+	fmt.Fprintf(file, commandResult)
+	fmt.Println("Test created! Run tests with `snapper test`")
+}
+
+func runCommandFromDir(command, dir string) string {
 	// Runs the command and returns the output
 	cmd := exec.Command("sh", "-c", command)
+	cmd.Dir = dir
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatal(err)
 	}
 	return string(stdoutStderr)
+}
+
+func runCommand(command string) string {
+	return runCommandFromDir(command, "")
 }
 
 func test(c *cli.Context) error {
@@ -141,8 +186,9 @@ func test(c *cli.Context) error {
 }
 
 func runTest(testID string) {
-	var testDir = "./__snapper__/tests/" + testID
-	command, err := ioutil.ReadFile(testDir + "/command.txt")
+	testDir := "./__snapper__/tests/" + testID
+	runTestDir := filepath.Join(testDir, "run_test")
+	command, err := ioutil.ReadFile(filepath.Join(runTestDir, "command.sh"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -151,7 +197,7 @@ func runTest(testID string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var actualOutput = runCommand(string(command))
+	var actualOutput = runCommandFromDir(string(command), runTestDir)
 
 	if actualOutput == string(expectedOutput) {
 		fmt.Println(testID, ": passed")
