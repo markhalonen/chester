@@ -1,8 +1,8 @@
 # snapper [![Build Status](https://travis-ci.org/markhalonen/snapper.svg?branch=master)](https://travis-ci.org/markhalonen/snapper) [![Go Report Card](https://goreportcard.com/badge/github.com/markhalonen/snapper)](https://goreportcard.com/report/github.com/markhalonen/snapper) [![Coverage Status](https://coveralls.io/repos/github/markhalonen/snapper/badge.svg?branch=master)](https://coveralls.io/github/markhalonen/snapper?branch=master)
 ---
-Snapper aims to be a low-effort testing framework. Life is too short to write tests manually.
+A low-effort testing framework.
 
-Snapper works by creating snapshot tests against any command line output. REST APIs or anything that can be invoked from command line can use snapper to watch for changes and easily update tests with one click.
+Snapper works by creating snapshot tests against any command line output. REST APIs or anything that can be invoked from command line can use snapper to watch for changes and easily update tests with one click. You can use any language that can be called from the command line (aka any language).
 
 ### Install
 1. Download the latest release from the [Github Releases Tab](https://github.com/markhalonen/snapper/releases)
