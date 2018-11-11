@@ -7,12 +7,58 @@ Snapper works by creating snapshot tests against any command line output. REST A
 ### Install
 1. Download the latest release from the [Github Releases Tab](https://github.com/markhalonen/snapper/releases)
 
-### Usage
+### Usage - Minimal Example
 `./snapper init` Creates the `__snapper__` directory where all the commands and snapshots will be stored
 
 `./snapper create 'echo "Hello world"'` Create your first snapper test
 
 `./snapper test` Run your new snapper test
+
+### Test a REST API with Python
+`./snapper init`
+
+`mkdir my_test` We will use this `my_test` folder to create the test. It must contain `command.sh`.
+
+Create these files in `my_test`:
+```
+my_test/
+├── command.sh
+└── test.py
+```
+
+Where `command.sh` contains:
+```bash
+python test.py
+``` 
+and `test.py` contains:
+```python
+import json
+import random
+
+# Simulated server response
+def json_endpoint():
+    return json.dumps({"name": "Mark Halonen", "age": 23, "timestamp": random.randint(0,10000)})
+
+
+# Call our "endpoint"
+response = json_endpoint()
+
+# timestamp is not expected to remain the same, so let's remove it
+response_json = json.loads(response)
+del response_json["timestamp"]
+
+# Now we print so that snapper can capture the output
+print json.dumps(response_json, indent=4)
+```
+
+You should be able to run `./command.sh` and see json output. You may have to `chmod 777 command.sh`
+
+Now, let's use snapper to create a test from `my_test`
+
+`snapper create my_test` Will run the test and confirm the output. Select create.
+
+`snapper test` Can then be used to run this new test that uses Python to ignore the timestamp field, because we expect it to change.
+
 
 ## Motivation
 API Snapshot Testing Tool
