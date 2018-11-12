@@ -4,7 +4,7 @@ go:
   - tip
 before_install:
   - go get github.com/mattn/goveralls
-  - sudo apt-get tree
+  - sudo apt-get install tree
 jobs:
   include:
     - script: $GOPATH/bin/snapper test --silent
