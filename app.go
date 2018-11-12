@@ -127,7 +127,7 @@ func createTest(runDir, arg, commandResult string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var id = 0
+	var id = 1
 	for _, f := range files {
 		i, err := strconv.Atoi(f.Name())
 		if err != nil {
@@ -216,9 +216,9 @@ func runTest(testID string, silentMode bool) {
 	var actualOutput = runCommandFromDir(string(command), runTestDir)
 
 	if actualOutput == string(expectedOutput) {
-		fmt.Println(testID, ": passed")
+		fmt.Println("Test ", testID, ": passed")
 	} else {
-		fmt.Println(testID, ": failed")
+		fmt.Println("Test ", testID, ": failed")
 		printWithBorder("Expected Output", string(expectedOutput))
 		printWithBorder("Actual Output", string(actualOutput))
 
