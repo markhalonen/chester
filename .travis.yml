@@ -4,7 +4,8 @@ go:
   - tip
 before_install:
   - go get github.com/mattn/goveralls
+  - sudo apt-get tree
 jobs:
   include:
-    - script: $GOPATH/bin/snapper test
+    - script: $GOPATH/bin/snapper test --silent
     - script: $GOPATH/bin/goveralls -service=travis-ci
