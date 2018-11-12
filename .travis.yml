@@ -4,5 +4,7 @@ go:
   - tip
 before_install:
   - go get github.com/mattn/goveralls
-script:
-  - $GOPATH/bin/goveralls -service=travis-ci
+jobs:
+  include:
+    - script: $GOPATH/bin/snapper test
+    - script: $GOPATH/bin/goveralls -service=travis-ci
