@@ -1,0 +1,34 @@
+Initialized
+.
+└── .git
+    ├── HEAD
+    ├── branches
+    ├── config
+    ├── description
+    ├── hooks
+    │   ├── applypatch-msg.sample
+    │   ├── commit-msg.sample
+    │   ├── post-update.sample
+    │   ├── pre-applypatch.sample
+    │   ├── pre-commit.sample
+    │   ├── pre-push.sample
+    │   ├── pre-rebase.sample
+    │   ├── pre-receive.sample
+    │   ├── prepare-commit-msg.sample
+    │   └── update.sample
+    ├── info
+    │   └── exclude
+    ├── objects
+    │   ├── info
+    │   └── pack
+    └── refs
+        ├── heads
+        └── tags
+
+10 directories, 14 files
+new_file.txt
+A great new file
+.
+└── new_file.txt
+
+0 directories, 1 file
