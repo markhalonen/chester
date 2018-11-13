@@ -59,6 +59,11 @@ Now, let's use chester to create a test from `my_test`
 
 `chester test` Can then be used to run this new test that uses Python to ignore the timestamp field, because we expect it to change.
 
+## Develop Chester
+1. Follow [golang.org](https://golang.org/doc/install) to get your go environment up and running
+2. `go get https://github.com/markhalonen/chester`
+3. `cd` into the cloned repo
+4. `go install` after you make changes
 
 ## Motivation
 API Snapshot Testing Tool
