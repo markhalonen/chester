@@ -1,6 +1,6 @@
 mkdir workspace
 cd workspace
-snapper init
+chester init
 tree
 cd ..
 rm -rf workspace

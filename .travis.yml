@@ -7,5 +7,5 @@ before_install:
   - sudo apt-get install tree
 jobs:
   include:
-    - script: $GOPATH/bin/snapper test --silent
+    - script: $GOPATH/bin/chester test --silent
     - script: $GOPATH/bin/goveralls -service=travis-ci

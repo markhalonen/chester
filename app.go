@@ -15,13 +15,13 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "snapper"
+	app.Name = "chester"
 	app.Usage = "Automate your snapshot testing!"
 	app.Commands = []cli.Command{
 		{
 			Name:   "init",
-			Usage:  "initialize snapper",
-			Action: initSnapper,
+			Usage:  "initialize chester",
+			Action: initchester,
 		},
 		{
 			Name:   "create",
@@ -53,17 +53,17 @@ func main() {
 	}
 }
 
-func initSnapper(c *cli.Context) error {
-	if _, err := os.Stat("__snapper__"); err != nil {
+func initchester(c *cli.Context) error {
+	if _, err := os.Stat("__chester__"); err != nil {
 		if os.IsNotExist(err) {
 			// initialize.
-			os.Mkdir("__snapper__", os.ModePerm)
-			os.Mkdir("__snapper__/tests", os.ModePerm)
+			os.Mkdir("__chester__", os.ModePerm)
+			os.Mkdir("__chester__/tests", os.ModePerm)
 		} else {
-			fmt.Println("snapper is already initialized")
+			fmt.Println("chester is already initialized")
 		}
 	} else {
-		fmt.Println("snapper is already initialized")
+		fmt.Println("chester is already initialized")
 	}
 	return nil
 }
@@ -123,7 +123,7 @@ func create(c *cli.Context) error {
 
 func createTest(runDir, arg, commandResult string) {
 	fmt.Println("Creating a test with command: ", arg)
-	files, err := ioutil.ReadDir("./__snapper__/tests")
+	files, err := ioutil.ReadDir("./__chester__/tests")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -137,7 +137,7 @@ func createTest(runDir, arg, commandResult string) {
 			id = i + 1
 		}
 	}
-	testDir := filepath.Join("__snapper__/tests/", strconv.Itoa(id))
+	testDir := filepath.Join("__chester__/tests/", strconv.Itoa(id))
 	runTestDir := filepath.Join(testDir, "run_test")
 	os.MkdirAll(runTestDir, os.ModePerm)
 
@@ -171,7 +171,7 @@ func createTest(runDir, arg, commandResult string) {
 	}
 	defer file.Close()
 	fmt.Fprintf(file, commandResult)
-	fmt.Println("Test created! Run tests with `snapper test`")
+	fmt.Println("Test created! Run tests with `chester test`")
 }
 
 func runCommandFromDir(command, dir string) string {
@@ -191,7 +191,7 @@ func runCommand(command string) string {
 
 func test(c *cli.Context) {
 	// Goes through all the tests and makes sure the outputs are the same.
-	files, err := ioutil.ReadDir("./__snapper__/tests")
+	files, err := ioutil.ReadDir("./__chester__/tests")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -207,7 +207,7 @@ func test(c *cli.Context) {
 }
 
 func runTest(testID string, silentMode bool) bool {
-	testDir := "./__snapper__/tests/" + testID
+	testDir := "./__chester__/tests/" + testID
 	runTestDir := filepath.Join(testDir, "run_test")
 	command, err := ioutil.ReadFile(filepath.Join(runTestDir, "command.sh"))
 	if err != nil {

@@ -1,21 +1,21 @@
-# snapper [![Build Status](https://travis-ci.org/markhalonen/snapper.svg?branch=master)](https://travis-ci.org/markhalonen/snapper) [![Go Report Card](https://goreportcard.com/badge/github.com/markhalonen/snapper)](https://goreportcard.com/report/github.com/markhalonen/snapper) [![Coverage Status](https://coveralls.io/repos/github/markhalonen/snapper/badge.svg?branch=master)](https://coveralls.io/github/markhalonen/snapper?branch=master)
+# chester [![Build Status](https://travis-ci.org/markhalonen/chester.svg?branch=master)](https://travis-ci.org/markhalonen/chester) [![Go Report Card](https://goreportcard.com/badge/github.com/markhalonen/chester)](https://goreportcard.com/report/github.com/markhalonen/chester) [![Coverage Status](https://coveralls.io/repos/github/markhalonen/chester/badge.svg?branch=master)](https://coveralls.io/github/markhalonen/chester?branch=master)
 ---
 A low-effort testing framework.
 
-Snapper works by creating snapshot tests against any command line output. REST APIs or anything that can be invoked from command line can use snapper to watch for changes and easily update tests with one click. You can use any language that can be called from the command line (aka any language).
+chester works by creating snapshot tests against any command line output. REST APIs or anything that can be invoked from command line can use chester to watch for changes and easily update tests with one click. You can use any language that can be called from the command line (aka any language).
 
 ### Install
-1. Download the latest release from the [Github Releases Tab](https://github.com/markhalonen/snapper/releases)
+1. Download the latest release from the [Github Releases Tab](https://github.com/markhalonen/chester/releases)
 
 ### Usage - Minimal Example
-`./snapper init` Creates the `__snapper__` directory where all the commands and snapshots will be stored
+`./chester init` Creates the `__chester__` directory where all the commands and snapshots will be stored
 
-`./snapper create 'echo "Hello world"'` Create your first snapper test
+`./chester create 'echo "Hello world"'` Create your first chester test
 
-`./snapper test` Run your new snapper test
+`./chester test` Run your new chester test
 
 ### Test a REST API with Python
-`./snapper init`
+`./chester init`
 
 `mkdir my_test` We will use this `my_test` folder to create the test. It must contain `command.sh`.
 
@@ -47,17 +47,17 @@ response = json_endpoint()
 response_json = json.loads(response)
 del response_json["timestamp"]
 
-# Now we print so that snapper can capture the output
+# Now we print so that chester can capture the output
 print json.dumps(response_json, indent=4)
 ```
 
 You should be able to run `./command.sh` and see json output. You may have to `chmod 777 command.sh`
 
-Now, let's use snapper to create a test from `my_test`
+Now, let's use chester to create a test from `my_test`
 
-`snapper create my_test` Will run the test and confirm the output. Select create.
+`chester create my_test` Will run the test and confirm the output. Select create.
 
-`snapper test` Can then be used to run this new test that uses Python to ignore the timestamp field, because we expect it to change.
+`chester test` Can then be used to run this new test that uses Python to ignore the timestamp field, because we expect it to change.
 
 
 ## Motivation
@@ -87,5 +87,5 @@ So I propose a new API Snapshot Testing Tool with the following goals:
 
 The command line tool would look something like:
 
-snapper create 'curl -X GET http:localhost:8080/todos' // Runs the command and displays the result. Y/N to save to disk.
-snapper test // Runs all the tests. For each failing test, show a diff of the output and Y/N if the snapshot should be updated.
+chester create 'curl -X GET http:localhost:8080/todos' // Runs the command and displays the result. Y/N to save to disk.
+chester test // Runs all the tests. For each failing test, show a diff of the output and Y/N if the snapshot should be updated.

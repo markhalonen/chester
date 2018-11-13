@@ -1,5 +1,5 @@
 .
-└── __snapper__
+└── __chester__
     └── tests
 
 2 directories, 0 files
@@ -8,5 +8,5 @@ hello world
 
 =========================================================
 Creating a test with command:  echo "hello world"
-Test created! Run tests with `snapper test`
+Test created! Run tests with `chester test`
 Test  1 : passed

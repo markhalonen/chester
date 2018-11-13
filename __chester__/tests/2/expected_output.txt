@@ -3,5 +3,5 @@ Hello From Python!
 
 =========================================================
 Creating a test with command:  my_test
-Test created! Run tests with `snapper test`
+Test created! Run tests with `chester test`
 Test  1 : passed
