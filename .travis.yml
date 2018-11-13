@@ -5,10 +5,7 @@ go:
 before_install:
   - go get github.com/mattn/goveralls
   - sudo apt-get install tree
-jobs:
-  include:
-    - script: $GOPATH/bin/chester test --silent
-    - script: $GOPATH/bin/goveralls -service=travis-ci
+script: $GOPATH/bin/chester test --silent && $GOPATH/bin/goveralls -service=travis-ci
 deploy:
 - provider: script
   skip_cleanup: true
