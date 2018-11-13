@@ -189,19 +189,24 @@ func runCommand(command string) string {
 	return runCommandFromDir(command, "")
 }
 
-func test(c *cli.Context) error {
+func test(c *cli.Context) {
 	// Goes through all the tests and makes sure the outputs are the same.
 	files, err := ioutil.ReadDir("./__snapper__/tests")
 	if err != nil {
 		log.Fatal(err)
 	}
+	allTestsPassing := true
 	for _, f := range files {
-		runTest(f.Name(), c.Bool("silent"))
+		allTestsPassing = allTestsPassing && runTest(f.Name(), c.Bool("silent"))
 	}
-	return nil
+	if allTestsPassing {
+		os.Exit(0)
+	} else {
+		os.Exit(1)
+	}
 }
 
-func runTest(testID string, silentMode bool) {
+func runTest(testID string, silentMode bool) bool {
 	testDir := "./__snapper__/tests/" + testID
 	runTestDir := filepath.Join(testDir, "run_test")
 	command, err := ioutil.ReadFile(filepath.Join(runTestDir, "command.sh"))
@@ -217,39 +222,42 @@ func runTest(testID string, silentMode bool) {
 
 	if actualOutput == string(expectedOutput) {
 		fmt.Println("Test ", testID, ": passed")
-	} else {
-		fmt.Println("Test ", testID, ": failed")
-		printWithBorder("Expected Output", string(expectedOutput))
-		printWithBorder("Actual Output", string(actualOutput))
-
-		result := "Skip"
-		if !silentMode {
-			prompt := promptui.Select{
-				Label: "Options",
-				Items: []string{"Update Expected Output", "Delete Test", "Skip", "Exit"},
-			}
-
-			_, result2, err := prompt.Run()
-			result = result2
-
-			if err != nil {
-				fmt.Printf("Prompt failed %v\n", err)
-				return
-			}
-		}
-
-		if result == "Exit" {
-			os.Exit(0)
-		} else if result == "Skip" {
-			fmt.Println("Skipping")
-			return
-		} else if result == "Delete Test" {
-			os.RemoveAll(testDir)
-		} else if result == "Update Expected Output" {
-			ioutil.WriteFile(testDir+"/expected_output.txt", []byte(actualOutput), os.ModePerm)
-		}
-
+		return true
 	}
+
+	// The test failed.
+
+	fmt.Println("Test ", testID, ": failed")
+	printWithBorder("Expected Output", string(expectedOutput))
+	printWithBorder("Actual Output", string(actualOutput))
+
+	result := "Skip"
+	if !silentMode {
+		prompt := promptui.Select{
+			Label: "Options",
+			Items: []string{"Update Expected Output", "Delete Test", "Skip", "Exit"},
+		}
+
+		_, result2, err := prompt.Run()
+		result = result2
+
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+			return false
+		}
+	}
+
+	if result == "Exit" {
+		os.Exit(1)
+	} else if result == "Skip" {
+		fmt.Println("Skipping")
+	} else if result == "Delete Test" {
+		os.RemoveAll(testDir)
+	} else if result == "Update Expected Output" {
+		ioutil.WriteFile(testDir+"/expected_output.txt", []byte(actualOutput), os.ModePerm)
+	}
+	return false
+
 }
 
 func printWithBorder(title, content string) {
