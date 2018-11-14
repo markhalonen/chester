@@ -180,7 +180,7 @@ func runCommandFromDir(command, dir string) string {
 	cmd.Dir = dir
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(string(stdoutStderr))
 	}
 	return string(stdoutStderr)
 }
