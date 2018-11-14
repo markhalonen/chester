@@ -235,7 +235,7 @@ func runTest(testID string, silentMode bool) bool {
 	if !silentMode {
 		prompt := promptui.Select{
 			Label: "Options",
-			Items: []string{"Update Expected Output", "Delete Test", "Skip", "Exit"},
+			Items: []string{"Skip", "Update Expected Output", "Delete Test", "Exit"},
 		}
 
 		_, result2, err := prompt.Run()
