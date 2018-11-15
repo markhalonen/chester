@@ -10,7 +10,7 @@ func slicesEqual(s1, s2 [][]interface{}) bool {
 	}
 	for i := range s1 {
 		s1_1 := s1[i]
-		s2_1 := s1[i]
+		s2_1 := s2[i]
 		if len(s1_1) != len(s2_1) {
 			return false
 		}
@@ -37,7 +37,7 @@ var tests = []testpair{
 	},
 	{
 		[]string{`{}`, `{"k1": "v1"}`},
-		[][]interface{}{{""}},
+		[][]interface{}{{"k1"}},
 	},
 	{
 		[]string{`{"k1" : "v1"}`, `{"k1" : "v1"}`},
@@ -80,20 +80,33 @@ var tests = []testpair{
 		[][]interface{}{{"k1", "k2"}},
 	},
 	{
-		[]string{`{"k1": [1]}`, `{"k1": [1,2]}`},
-		[][]interface{}{{"k1"}},
+		[]string{`{"k1": [1,3]}`, `{"k1": [1,2]}`},
+		[][]interface{}{{"k1", 1}},
 	},
 	{
-		[]string{`{"k1": [1]}`, `{"k1": [1,2]}`},
-		[][]interface{}{{"k1"}},
+		[]string{`{"k1": [2,2]}`, `{"k1": [1,2]}`},
+		[][]interface{}{{"k1", 0}},
+	},
+	{
+		[]string{`{"k1": [1,2]}`, `{"k1": [1]}`},
+		[][]interface{}{{"k1", 1}},
+	},
+	{
+		[]string{`{"k1": [2,2]}`, `{"k1": [1]}`},
+		[][]interface{}{{"k1", 0}, {"k1", 1}},
+	},
+	{
+		[]string{`{"k1": [{"k1": "v1"},1]}`, `{"k1": [{"k1": "v1"},2]}`},
+		[][]interface{}{{"k1", 1}},
 	},
 }
 
 func TestGetIgnores(t *testing.T) {
 	for _, pair := range tests {
+
 		result := getIgnores([]byte(pair.args[0]), []byte(pair.args[1]))
 		if !slicesEqual(result, pair.expected) {
-			t.Error("Failed with args: ", pair.args[0], " and ", pair.args[1])
+			t.Error("Failed with args: ", pair.args[0], " and ", pair.args[1], ". Expected ", pair.expected, " but got ", result)
 		}
 	}
 }

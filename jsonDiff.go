@@ -12,6 +12,13 @@ func min(a, b int) int {
 	return b
 }
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 func getJSONObject(s []byte) map[string]interface{} {
 	var f interface{}
 	err := json.Unmarshal(s, &f)
@@ -21,6 +28,46 @@ func getJSONObject(s []byte) map[string]interface{} {
 	}
 	m := f.(map[string]interface{})
 	return m
+}
+
+func compareObs(obAVal, obBVal interface{}, currentPath []interface{}, k interface{}) [][]interface{} {
+	paths := make([][]interface{}, 0)
+	switch obAVal.(type) {
+	case map[string]interface{}:
+		switch obBVal.(type) {
+		case map[string]interface{}:
+			// they are both objects, recur.
+			obAValMap := obAVal.(map[string]interface{})
+			obBValMap := obBVal.(map[string]interface{})
+			paths = append(paths, getDifferingPaths(obAValMap, obBValMap, append(currentPath, k))...)
+		default:
+			// types are not equal.
+			paths = append(paths, append(currentPath, k))
+		}
+	case []interface{}:
+		switch obBVal.(type) {
+		case []interface{}:
+			ObASlice := obAVal.([]interface{})
+			ObBSlice := obBVal.([]interface{})
+			for i := 0; i < min(len(ObASlice), len(ObBSlice)); i++ {
+				aVal := ObASlice[i]
+				bVal := ObBSlice[i]
+				paths = append(paths, compareObs(aVal, bVal, append(currentPath, k), i)...)
+			}
+			for i := min(len(ObASlice), len(ObBSlice)); i < max(len(ObASlice), len(ObBSlice)); i++ {
+
+				paths = append(paths, append(append(currentPath, k), i))
+			}
+		default:
+			// types are not equal.
+			paths = append(paths, append(currentPath, k))
+		}
+	default:
+		if obAVal != obBVal {
+			paths = append(paths, append(currentPath, k))
+		}
+	}
+	return paths
 }
 
 func getDifferingPaths(obA, obB map[string]interface{}, currentPath []interface{}) [][]interface{} {
@@ -42,41 +89,7 @@ func getDifferingPaths(obA, obB map[string]interface{}, currentPath []interface{
 			continue
 		}
 
-		switch obAVal.(type) {
-		case map[string]interface{}:
-			switch obBVal.(type) {
-			case map[string]interface{}:
-				// they are both objects, recur.
-				obAValMap := obAVal.(map[string]interface{})
-				obBValMap := obBVal.(map[string]interface{})
-				paths = append(paths, getDifferingPaths(obAValMap, obBValMap, append(currentPath, k))...)
-			default:
-				// types are not equal.
-				paths = append(paths, append(currentPath, k))
-			}
-		case []interface{}:
-			switch obBVal.(type) {
-			case []interface{}:
-				ObASlice := obAVal.([]interface{})
-				ObBSlice := obBVal.([]interface{})
-				for i := 0; i < min(len(ObASlice), len(ObBSlice)); i++ {
-
-				}
-			default:
-				// types are not equal.
-				paths = append(paths, append(currentPath, k))
-			}
-		case string:
-			if obAVal != obBVal {
-				paths = append(paths, append(currentPath, k))
-			}
-		case float64:
-			if obAVal != obBVal {
-				paths = append(paths, append(currentPath, k))
-			}
-		default:
-			fmt.Println(obAVal, "is of a type I don't know how to handle")
-		}
+		paths = append(paths, compareObs(obAVal, obBVal, currentPath, k)...)
 
 	}
 
