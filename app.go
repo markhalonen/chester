@@ -178,10 +178,7 @@ func runCommandFromDir(command, dir string) string {
 	// Runs the command and returns the output
 	cmd := exec.Command("sh", "-c", command)
 	cmd.Dir = dir
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatal(string(stdoutStderr))
-	}
+	stdoutStderr, _ := cmd.CombinedOutput()
 	return string(stdoutStderr)
 }
 
@@ -228,8 +225,13 @@ func runTest(testID string, silentMode bool) bool {
 	// The test failed.
 
 	fmt.Println("Test ", testID, ": failed")
-	printWithBorder("Expected Output", string(expectedOutput))
-	printWithBorder("Actual Output", string(actualOutput))
+
+	actualOutputFile := testDir + "/actual_output.txt"
+	ioutil.WriteFile(actualOutputFile, []byte(actualOutput), os.ModePerm)
+	var gitDiff = runCommandFromDir("git -c color.ui=always diff --no-index expected_output.txt actual_output.txt", testDir)
+	os.Remove(actualOutputFile)
+
+	fmt.Println(gitDiff)
 
 	result := "Skip"
 	if !silentMode {
