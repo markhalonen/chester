@@ -242,9 +242,6 @@ func runTest(testID string, silentMode bool) bool {
 
 	result := "Skip"
 	if !silentMode {
-
-		// check for json and give the option to save the ignore file so the test will pass.
-
 		prompt := promptui.Select{
 			Label: "Options",
 			Items: []string{"Skip", "Update Expected Output", "Delete Test", "Exit"},
