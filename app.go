@@ -211,13 +211,14 @@ func runTest(testID string, silentMode bool) bool {
 		log.Fatal(err)
 	}
 
-	expectedOutput, err := ioutil.ReadFile(testDir + "/expected_output.txt")
+	bytes, err := ioutil.ReadFile(testDir + "/expected_output.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
+	expectedOutput := string(bytes)
 	var actualOutput = runCommandFromDir(string(command), runTestDir)
 
-	if actualOutput == string(expectedOutput) {
+	if actualOutput == expectedOutput {
 		fmt.Println("Test ", testID, ": passed")
 		return true
 	}
@@ -233,8 +234,17 @@ func runTest(testID string, silentMode bool) bool {
 
 	fmt.Println(gitDiff)
 
+	// If it's JSON, try to print the paths to help the developer reconcile it.
+	jsonMessage := jsonDiffMessage(expectedOutput, actualOutput)
+	if jsonMessage != "" {
+		fmt.Println(jsonMessage)
+	}
+
 	result := "Skip"
 	if !silentMode {
+
+		// check for json and give the option to save the ignore file so the test will pass.
+
 		prompt := promptui.Select{
 			Label: "Options",
 			Items: []string{"Skip", "Update Expected Output", "Delete Test", "Exit"},

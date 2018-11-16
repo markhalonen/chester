@@ -25,12 +25,12 @@ func slicesEqual(s1, s2 [][]interface{}) bool {
 	return true
 }
 
-type testpair struct {
+type getIgnoreTestpair struct {
 	args     []string
 	expected [][]interface{}
 }
 
-var tests = []testpair{
+var getIgnoreTests = []getIgnoreTestpair{
 	{
 		[]string{`{}`, `{}`},
 		[][]interface{}{},
@@ -102,11 +102,74 @@ var tests = []testpair{
 }
 
 func TestGetIgnores(t *testing.T) {
-	for _, pair := range tests {
+	for _, pair := range getIgnoreTests {
 
-		result := getIgnores([]byte(pair.args[0]), []byte(pair.args[1]))
+		result, err := getIgnores(pair.args[0], pair.args[1])
+		if err != nil {
+			t.Error("Got unexpected error ", err)
+		}
 		if !slicesEqual(result, pair.expected) {
 			t.Error("Failed with args: ", pair.args[0], " and ", pair.args[1], ". Expected ", pair.expected, " but got ", result)
 		}
+	}
+}
+
+type getJSONPathTestpair struct {
+	arg      []interface{}
+	expected string
+}
+
+var getJSONPathTests = []getJSONPathTestpair{
+	{
+		[]interface{}{},
+		"",
+	},
+	{
+		[]interface{}{"a", "b", "c"},
+		"[\"a\"][\"b\"][\"c\"]",
+	},
+	{
+		[]interface{}{"a", 0, "c"},
+		"[\"a\"][0][\"c\"]",
+	},
+}
+
+func TestGetJSONPath(t *testing.T) {
+	for _, pair := range getJSONPathTests {
+
+		result := getJSONPath(pair.arg)
+		if result != pair.expected {
+			t.Error("Failed with arg: ", pair.arg)
+		}
+	}
+}
+
+func TestGetMessage(t *testing.T) {
+	for _, pair := range getIgnoreTests {
+		result := jsonDiffMessage(pair.args[0], pair.args[1])
+		expected := getMessage(pair.expected)
+		if result != expected {
+			t.Error("Failed with args: ", pair.args[0], " and ", pair.args[1], ". Expected ", expected, " but got ", result)
+		}
+	}
+
+}
+
+func TestJSONDiffMessage(t *testing.T) {
+	// Test non-JSON
+	if jsonDiffMessage("not json", "not json") != "" {
+		t.Error("Expected empty message")
+	}
+
+	if jsonDiffMessage(`{"k1": "v1"}`, "not json") != "" {
+		t.Error("Expected empty message")
+	}
+
+	if jsonDiffMessage("not json", `{"k1": "v1"}`) != "" {
+		t.Error("Expected empty message")
+	}
+
+	if jsonDiffMessage(`{"k1": "v1"}`, `{"k1": "v1"}`) != "" {
+		t.Error("Expected empty message")
 	}
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"strconv"
 )
 
 func min(a, b int) int {
@@ -19,15 +19,14 @@ func max(a, b int) int {
 	return b
 }
 
-func getJSONObject(s []byte) map[string]interface{} {
+func getJSONObject(s []byte) (map[string]interface{}, error) {
 	var f interface{}
 	err := json.Unmarshal(s, &f)
 	if err != nil {
-		fmt.Println(string(s), " is not valid JSON")
-		return make(map[string]interface{})
+		return nil, err
 	}
 	m := f.(map[string]interface{})
-	return m
+	return m, err
 }
 
 func compareObs(obAVal, obBVal interface{}, currentPath []interface{}, k interface{}) [][]interface{} {
@@ -72,15 +71,28 @@ func compareObs(obAVal, obBVal interface{}, currentPath []interface{}, k interfa
 
 func getDifferingPaths(obA, obB map[string]interface{}, currentPath []interface{}) [][]interface{} {
 	paths := make([][]interface{}, 0)
-	bothKeys := make(map[string]bool) // Really a set...
+	bothKeys := []string{}
+
 	for k := range obA {
-		bothKeys[k] = true
-	}
-	for k := range obB {
-		bothKeys[k] = true
+		bothKeys = append(bothKeys, k)
 	}
 
-	for k := range bothKeys {
+	for k := range obB {
+		inA := false
+
+		// Don't add duplicates
+		for k2 := range obA {
+			if k == k2 {
+				inA = true
+			}
+		}
+
+		if !inA {
+			bothKeys = append(bothKeys, k)
+		}
+	}
+
+	for _, k := range bothKeys {
 		obAVal, aValPresent := obA[k]
 		obBVal, bValPresent := obB[k]
 
@@ -96,31 +108,50 @@ func getDifferingPaths(obA, obB map[string]interface{}, currentPath []interface{
 	return paths
 }
 
-func printJSONObject(ob map[string]interface{}) {
-	for k, v := range ob {
-		switch vv := v.(type) {
-		case string:
-			fmt.Println(k, "is string", vv)
-		case float64:
-			fmt.Println(k, "is float64", vv)
-		case []interface{}:
-			fmt.Println(k, "is an array:")
-			for i, u := range vv {
-				fmt.Println(i, u)
-			}
-		case map[string]interface{}:
-			m := v.(map[string]interface{})
-			printJSONObject(m)
-		default:
-			fmt.Println(v, "is of a type I don't know how to handle")
-		}
+func getIgnores(a, b string) ([][]interface{}, error) {
+	aMap, err1 := getJSONObject([]byte(a))
+	if err1 != nil {
+		return nil, err1
 	}
+	bMap, err2 := getJSONObject([]byte(b))
+	if err2 != nil {
+		return nil, err2
+	}
+	diffs := getDifferingPaths(aMap, bMap, make([]interface{}, 0))
+	return diffs, nil
 }
 
-func getIgnores(a, b []byte) [][]interface{} {
-	aMap := getJSONObject(a)
-	bMap := getJSONObject(b)
+func getJSONPath(path []interface{}) string {
+	if len(path) == 0 {
+		return ""
+	}
+	result := ""
+	for _, v := range path {
+		switch v.(type) {
+		case int:
+			result = result + "[" + strconv.Itoa(v.(int)) + "]"
+		case string:
+			result = result + "[\"" + v.(string) + "\"]"
+		}
+	}
+	return result
+}
 
-	diffs := getDifferingPaths(aMap, bMap, make([]interface{}, 0))
-	return diffs
+func getMessage(ignores [][]interface{}) string {
+	if len(ignores) == 0 {
+		return ""
+	}
+	result := "Chester calculated that the following JSON paths differ:\n"
+	for _, ignore := range ignores {
+		result = result + "- " + getJSONPath(ignore) + "\n"
+	}
+	return result
+}
+
+func jsonDiffMessage(a, b string) string {
+	ignores, err := getIgnores(a, b)
+	if err != nil {
+		return ""
+	}
+	return getMessage(ignores)
 }
