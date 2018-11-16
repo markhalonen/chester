@@ -1,0 +1,22 @@
+======================== Output =========================
+{"k1": "v1"}
+
+=========================================================
+Creating a test with command:  my_test
+Test created! Run tests with `chester test`
+Test  1 : passed
+Test  1 : failed
+[1mdiff --git a/expected_output.txt b/actual_output.txt[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+[1mindex 64d5f00..7a775db[m
+[1m--- a/expected_output.txt[m
+[1m+++ b/actual_output.txt[m
+[36m@@ -1 +1 @@[m
+[31m-{"k1":"v2"}[m
+[32m+[m[32m{"k1": "v1"}[m
+
+Chester calculated that the following JSON paths differ:
+- ["k1"]
+
+Skipping
